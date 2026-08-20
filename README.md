@@ -1,458 +1,332 @@
-## Resequencing Genome Analysis Toolkit
+# RGA
 
-**RGA** is an integrated command-line toolkit for automated and standardized analysis of whole-genome resequencing data. It was developed to simplify large-scale variant analysis, particularly for experimentally induced mutant populations, by integrating major steps from sequence alignment and variant detection to multi-sample comparison, functional annotation, quality assessment, and downstream result organization.
+**Resequencing Genome Analysis Toolkit**
 
-RGA is designed for Linux-based computing environments and supports parallel processing of large resequencing datasets.
+![Version](https://img.shields.io/badge/version-3.24-1f6feb)
+![Platform](https://img.shields.io/badge/platform-Linux-2f855a)
+![Distribution](https://img.shields.io/badge/distribution-binary--only-f59e0b)
+![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-d73a49)
 
-> **This repository is the official software distribution repository for RGA.**  
-> It provides packaged RGA releases, documentation, and version information.  
-> **RGA source code is not publicly distributed through this repository.**
+RGA is a command-line toolkit for reproducible analysis of paired-end whole-genome resequencing data. It integrates read alignment, BAM processing and quality assessment, SNP/INDEL calling, structural-variant detection, target-sample-specific candidate filtering, functional annotation, result merging, and optional IGV batch snapshots in a single workflow.
 
----
+Website: [https://rga.kefan.work/](https://rga.kefan.work/)  
+Contact: [Zhe Li](mailto:lizhe@impcas.ac.cn)
 
-## Overview
+> [!IMPORTANT]
+> This repository distributes compiled RGA release packages, documentation, and release information. RGA source code is not published in this repository. RGA is therefore described as **binary-distributed research software**, not as open-source software.
 
-Whole-genome resequencing analysis typically requires multiple independent bioinformatics tools and a series of interconnected processing steps, including:
+[中文快速说明](#中文快速说明)
 
-- sequencing data quality assessment;
-- reference genome preparation;
-- read alignment;
-- BAM processing;
-- variant detection;
-- quality filtering;
-- multi-sample comparison;
-- functional annotation;
-- structural variant analysis;
-- result summarization and visualization.
+## Features
 
-For large mutant populations, additional challenges arise from the need to distinguish candidate induced mutations from shared background variants and to process large numbers of samples using consistent analytical criteria.
+- Paired-end FASTQ alignment with BWA or BWA-MEM2.
+- BAM processing with Samtools: fixmate, coordinate sorting, duplicate marking, final BAM generation, and indexing.
+- BAM quality assessment with Qualimap.
+- SNP and INDEL calling through GATK, VarScan, or both callers.
+- Configurable GATK hard-filter thresholds.
+- Target-sample-specific filtering based on read support and alternative-allele frequency across samples.
+- Optional structural-variant analysis using the bundled sv-callers workflow.
+- Functional annotation with snpEff.
+- Optional IGV batch snapshots for SNPs, INDELs, and SVs.
+- Resume-aware execution that skips completed stages.
+- Optional cleanup of large alignment intermediates after final BAM generation.
+- English interface by default, with a Chinese interface available through `-lang zn`.
+- Optional email notification after analysis.
 
-RGA provides an integrated workflow for these tasks and organizes the resulting outputs into a standardized structure, reducing the amount of manual workflow construction required for large-scale resequencing projects.
+## Workflow
 
----
-
-## Current Release
-
-**Current stable release: RGA v3.24**
-
-The latest RGA distribution package is available from the **[Releases](../../releases)** section of this repository.
-
-Users are encouraged to use the latest stable version unless a specific version is required for reproducibility.
-
-For scientific publications, the exact RGA version used in the analysis should always be reported.
-
----
-
-## Key Features
-
-### Reference Genome Preparation
-
-RGA prepares the reference genome and associated index files required for downstream analyses.
-
-### Read Alignment
-
-Whole-genome sequencing reads can be aligned to a user-specified reference genome using supported alignment tools.
-
-### BAM Processing
-
-RGA performs standardized processing of alignment files, including sorting, indexing, and preparation for downstream variant analysis.
-
-### SNP and InDel Detection
-
-RGA integrates established variant-calling approaches for identification of:
-
-- single-nucleotide polymorphisms (SNPs);
-- small insertions and deletions (InDels).
-
-### Variant Quality Filtering
-
-Candidate variants can be filtered using standardized quality-control criteria to remove low-confidence calls.
-
-### Multi-sample Comparison
-
-RGA supports comparative analysis across multiple samples.
-
-This function is particularly useful for experimentally induced mutant populations, in which variants shared among multiple individuals may represent:
-
-- parental background polymorphisms;
-- naturally occurring variants;
-- recurrent technical signals;
-- common population-level variation.
-
-Cross-sample comparison can therefore facilitate the identification of sample-specific candidate mutations.
-
-### Sample-specific Mutation Screening
-
-RGA supports allele-frequency-based screening across target and non-target samples to identify candidate variants associated with individual mutant materials.
-
-### Functional Annotation
-
-Candidate genomic variants can be annotated according to their genomic locations and predicted functional consequences.
-
-### Structural Variant Analysis
-
-RGA provides optional structural variation analysis through supported SV detection tools.
-
-### Quality Assessment
-
-Sequencing and alignment quality metrics can be generated for individual samples to facilitate quality control of large resequencing datasets.
-
-### Batch Processing
-
-RGA supports multi-threaded and multi-sample processing and is suitable for large-scale resequencing projects involving tens to hundreds of samples.
-
-### Standardized Output
-
-Analysis results are automatically organized into standardized directories to facilitate:
-
-- downstream statistical analysis;
-- manual inspection;
-- visualization;
-- candidate mutation screening;
-- data archiving.
-
----
-
-## Integrated Bioinformatics Tools
-
-Depending on the selected analysis modules and RGA configuration, the workflow can interface with established bioinformatics software including:
-
-- **BWA / BWA-MEM2**
-- **SAMtools**
-- **GATK**
-- **VarScan2**
-- **snpEff**
-- **DELLY**
-- **Manta**
-- **LUMPY**
-- **Qualimap**
-- **IGV-related utilities**
-
-These programs are independent third-party software packages and remain subject to their respective licenses and terms of use.
-
-Unless explicitly stated for a specific release, third-party software should be installed separately by the user.
-
-RGA does not modify or replace the licensing terms of any third-party software.
-
-See [`THIRD_PARTY_SOFTWARE.md`](THIRD_PARTY_SOFTWARE.md) for additional information.
-
----
-
-## Typical Analysis Workflow
-
-```text
-Raw whole-genome sequencing data
-                │
-                ▼
-        Input data checking
-                │
-                ▼
-      Reference preparation
-                │
-                ▼
-          Read alignment
-                │
-                ▼
-          BAM processing
-                │
-                ▼
-          Quality control
-                │
-                ▼
-          Variant calling
-          ├── SNP
-          ├── InDel
-          └── SV
-                │
-                ▼
-        Variant filtering
-                │
-                ▼
-      Multi-sample comparison
-                │
-                ▼
- Sample-specific variant screening
-                │
-                ▼
-       Functional annotation
-                │
-                ▼
-     Standardized result output
-                │
-                ▼
- Statistical analysis / visualization /
- candidate mutation and gene screening
+```mermaid
+flowchart LR
+    A["Paired-end clean FASTQ"] --> B["BWA / BWA-MEM2"]
+    B --> C["Samtools BAM processing"]
+    C --> D["Final BAM + BAI"]
+    D --> E["Qualimap QC"]
+    D --> F["GATK SNP / INDEL"]
+    D --> G["VarScan SNP / INDEL"]
+    D --> H["sv-callers SV workflow"]
+    F --> I["Target-specific filtering"]
+    G --> I
+    H --> I
+    I --> J["snpEff annotation"]
+    J --> K["Final merged VCF"]
+    J --> L["Optional IGV snapshots"]
 ```
 
-Individual modules can be selected according to the experimental design and analysis requirements.
+## Distribution Model
 
----
+GitHub Releases are used to distribute the compiled Linux executable and supporting resources. A release package may contain:
 
-## Applications
+- the `rga` executable;
+- Conda environment definitions;
+- the VarScan v2.3.9 Java package;
+- an unmodified copy of the official sv-callers v1.2.2 release archive;
+- deployment and workflow documentation;
+- license and third-party notices.
 
-RGA was developed with particular consideration for genomic analysis of experimentally induced mutant populations.
-
-Potential applications include:
-
-- heavy-ion beam mutagenesis;
-- heavy-ion microbeam mutagenesis;
-- radiation mutagenesis;
-- space mutagenesis;
-- chemical mutagenesis;
-- mutant population resequencing;
-- functional genomics;
-- candidate mutation identification;
-- candidate gene screening;
-- large-scale plant resequencing analysis.
-
-Although RGA was initially developed and evaluated using plant genomic datasets, its core resequencing workflow may also be applicable to other organisms when appropriate reference genomes and annotation resources are available.
-
----
+The executable is packaged as a single file, but the external bioinformatics programs invoked by RGA must still be installed in the runtime environment.
 
 ## System Requirements
 
-RGA is designed for **64-bit Linux systems**.
+RGA is intended for 64-bit Linux servers or high-performance computing nodes. Resource requirements depend on genome size, sequencing depth, sample count, enabled callers, and the number of IGV snapshots.
 
-Recommended environment:
+The core workflow requires the following software to be available on `PATH`:
 
-- 64-bit Linux operating system;
-- Bash shell;
-- multi-core CPU;
-- sufficient RAM for genome-scale analysis;
-- sufficient disk space for FASTQ, BAM, VCF, and intermediate files.
+- BWA and/or BWA-MEM2;
+- Samtools;
+- GATK;
+- Java;
+- Qualimap;
+- snpEff;
+- Conda.
 
-The exact computational requirements depend on:
-
-- genome size;
-- sequencing depth;
-- sample number;
-- enabled analysis modules;
-- number of parallel jobs.
-
-For large resequencing populations, a high-performance workstation or computing server is recommended.
-
----
-
-## Download
-
-RGA software packages are distributed through the **Releases** section of this repository.
-
-1. Open the **Releases** page.
-2. Select the required RGA version.
-3. Download the corresponding distribution package.
-4. Extract the package to the desired installation directory.
-
-Example:
-
-```bash
-tar -xzf RGA-v3.24.tar.gz
-cd RGA-v3.24
-```
-
-> The exact file name may differ depending on the release package.
-
----
+IGV screenshots additionally require IGV and Xvfb. SV analysis additionally requires Snakemake and the dependencies defined by the sv-callers workflow environment.
 
 ## Installation
 
-RGA is distributed as a packaged software release rather than as a source-code repository.
+Download the package for the target Linux platform from the repository's **Releases** page, extract it, and enter the release directory. The exact archive name may vary by release.
 
-After downloading and extracting the package, follow the documentation provided with the corresponding release.
+```bash
+tar -xzf rga-v3.24-linux-x86_64.tar.gz
+cd rga-v3.24-linux-x86_64
+chmod +x rga
+```
 
-Before starting an analysis, ensure that all required third-party dependencies are correctly installed and accessible from the system environment.
+Create the main analysis environment from the environment file supplied with the same release:
 
-Users are encouraged to verify the software environment before running large-scale analyses.
+```bash
+conda env create -n rga -f conda-bioinfo-environment.yml
+conda activate rga
+```
 
----
+For SV analysis, prepare the workflow environment under the name expected by RGA:
+
+```bash
+conda env create -n wf -f conda-wf-environment.yml
+```
+
+Run the environment check before the first analysis:
+
+```bash
+./rga -envcheck
+```
+
+When SV analysis will be used, include `-enable-sv` during the check:
+
+```bash
+./rga -enable-sv -envcheck
+```
+
+During environment initialization, RGA prepares the bundled VarScan Java package in the current working directory. The bundled sv-callers release is extracted only when SV detection is enabled and no custom sv-callers path is supplied.
 
 ## Input Data
 
-Typical RGA analyses require:
-
-- whole-genome resequencing reads;
-- a reference genome in FASTA format;
-- genome annotation files when functional annotation is required;
-- sample information;
-- appropriate analysis parameters.
-
-Paired-end sequencing data are recommended for standard whole-genome resequencing analyses.
-
-Example:
+Run RGA from a project directory containing `data/group_data/`. Each biological or analytical group must have its own subdirectory. Each sample must be represented by a complete pair of gzip-compressed clean FASTQ files.
 
 ```text
-reference.fa
-
-sample1_R1.fastq.gz
-sample1_R2.fastq.gz
-
-sample2_R1.fastq.gz
-sample2_R2.fastq.gz
-
-sample3_R1.fastq.gz
-sample3_R2.fastq.gz
+project/
+├── rga
+└── data/
+    └── group_data/
+        ├── group_A/
+        │   ├── sample01_1.clean.fq.gz
+        │   ├── sample01_2.clean.fq.gz
+        │   ├── sample02_1.clean.fq.gz
+        │   └── sample02_2.clean.fq.gz
+        └── group_B/
+            ├── sample03_1.clean.fq.gz
+            └── sample03_2.clean.fq.gz
 ```
 
----
-
-## Output
-
-Depending on the selected modules, RGA can generate:
-
-- processed BAM files;
-- SNP variant files;
-- InDel variant files;
-- structural variation results;
-- filtered candidate variants;
-- sample-specific candidate variant sets;
-- functional annotation results;
-- sequencing quality reports;
-- alignment quality reports;
-- summary statistics;
-- files for downstream visualization and manual inspection.
-
-The standardized output structure is designed to facilitate subsequent statistical analysis and interpretation.
-
----
-
-## Analysis of Mutant Populations
-
-RGA is particularly suited to resequencing analysis of experimentally induced mutant populations.
-
-In such populations, detected genomic variants may originate from multiple sources, including:
-
-- induced mutations;
-- parental background polymorphisms;
-- pre-existing genetic variation;
-- variants shared among multiple samples;
-- technical artifacts.
-
-RGA therefore provides multi-sample comparison and sample-specific screening procedures to reduce shared background variation and prioritize candidate mutations associated with individual mutant materials.
-
-This framework is particularly useful when large mutant populations are subjected to whole-genome resequencing.
-
----
-
-## Version Information
-
-RGA is under continued development.
-
-Different releases may contain changes in:
-
-- integrated analysis tools;
-- variant filtering procedures;
-- analysis modules;
-- output structure;
-- computational performance;
-- downstream analysis functions.
-
-For reproducible research, users should always record and report the exact RGA version used.
-
-Example:
+Required naming convention:
 
 ```text
-RGA version 3.24
+<sample>_1.clean.fq.gz
+<sample>_2.clean.fq.gz
 ```
 
----
+RGA discovers samples from the `_1.clean.fq.gz` suffix and expects the matching R2 file in the same group directory. Use an absolute path for the reference genome and verify FASTQ integrity before analysis.
+
+## Quick Start
+
+Minimal GATK SNP/INDEL analysis:
+
+```bash
+./rga \
+  -R /absolute/path/to/reference.fa \
+  -sdn Arabidopsis_thaliana
+```
+
+Run both GATK and VarScan with BWA-MEM2 and remove alignment intermediates after final BAM generation:
+
+```bash
+./rga \
+  -R /absolute/path/to/reference.fa \
+  -sdn Arabidopsis_thaliana \
+  -t 16 \
+  -mt bwa-mem2 \
+  -c both \
+  -autoclear
+```
+
+Enable structural-variant detection and IGV snapshots:
+
+```bash
+./rga \
+  -R /absolute/path/to/reference.fa \
+  -sdn Arabidopsis_thaliana \
+  -t 32 \
+  -c both \
+  -enable-sv \
+  -enable-snp-indel-igv \
+  -enable-sv-igv
+```
+
+## Language and Help
+
+RGA uses English by default.
+
+```bash
+./rga
+./rga -help
+```
+
+Use the Chinese interface with either language option:
+
+```bash
+./rga -lang zn
+./rga -lang zn -help
+```
+
+RGA supports `-h` and `-help`; its own command-line options use a single leading hyphen.
+
+## Core Options
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `-R`, `-ref FILE` | Absolute path to the reference-genome FASTA | required |
+| `-sdn`, `-snpeffdbname STR` | snpEff database matching the reference build | required |
+| `-t`, `-threads INT` | Main thread count | `16` |
+| `-mt`, `-mappingtool STR` | `bwa` or `bwa-mem2` | `bwa` |
+| `-c`, `-caller STR` | `gatk`, `varscan`, or `both` | `gatk` |
+| `-maxf`, `-max-freq FLOAT` | Minimum ALT frequency in the target sample | `0.25` |
+| `-minf`, `-min-freq FLOAT` | Maximum ALT frequency in every non-target sample | `0.10` |
+| `-tr`, `-total-reads INT` | Minimum REF + ALT read count | `0` |
+| `-ar`, `-alt-reads INT` | Minimum ALT-supporting read count | `1` |
+| `-enable-sv` | Enable structural-variant detection | disabled |
+| `-enable-snp-indel-igv` | Enable SNP/INDEL IGV snapshots | disabled |
+| `-enable-sv-igv` | Enable SV IGV snapshots | disabled |
+| `-autoclear` | Delete alignment intermediates after final BAM creation | disabled |
+| `-send-email` | Send a completion notification | disabled |
+| `-E`, `-email STR` | Notification recipient; required with `-send-email` | none |
+| `-lang`, `-language STR` | Interface language: `en`, `zn`, or `zh` | `en` |
+| `-ec`, `-envcheck` | Run the environment check and exit | disabled |
+
+Use `./rga -help` for the complete GATK hard-filter and SV-filter parameter list.
+
+## Outputs
+
+Sample-level alignment outputs are written below the corresponding sample group:
+
+```text
+data/group_data/<group>/<sample>/<sample>_final.bam
+data/group_data/<group>/<sample>/<sample>_final.bam.bai
+```
+
+Caller-specific results are stored in:
+
+```text
+data/group_data/<group>/gatk_snp_indel/
+data/group_data/<group>/varscan_snp_indel/
+data/group_data/<group>/sv_detection/
+```
+
+Annotated, cross-group result files are generated in the project working directory:
+
+```text
+The_Final_All.CustomFiltering.gatk.ann.<timestamp>.vcf
+The_Final_All.CustomFiltering.varscan.ann.<timestamp>.vcf
+The_Final_All.CustomFiltering.sv.ann.<timestamp>.vcf
+```
+
+Candidate variants are research candidates rather than automatically validated biological mutations. Review BAM quality, read support, repetitive regions, IGV evidence, and experimental validation before drawing biological conclusions.
+
+## Resume and Cleanup
+
+RGA detects existing stage outputs and skips completed work. For the mapping stage, the presence of both `<sample>_final.bam` and `<sample>_final.bam.bai` is sufficient to skip alignment during a rerun. This allows a later run to add IGV options without repeating completed alignment and variant-calling stages.
+
+With `-autoclear`, RGA removes the following intermediates after the final BAM has been generated successfully:
+
+```text
+<sample>.sam
+<sample>_fixmate.bam
+<sample>_pos.srt.bam
+<sample>_markdup.bam
+```
+
+## Documentation
+
+- [Researcher deployment and usage guide](./RGA_研究人员部署与使用指南.md) (Chinese)
+- [SNP, INDEL, and SV workflow reference](./RGA_SNP_INDEL_SV分析流程说明.md) (Chinese)
+- Full command-line reference: `./rga -help`
+- Project website: [https://rga.kefan.work/](https://rga.kefan.work/)
 
 ## Citation
 
-If RGA contributes to your research, please cite the corresponding RGA publication.
+When reporting results generated with RGA, record at least the RGA version, build date, complete command, reference-genome assembly, snpEff database version, and versions of all external callers. Until a dedicated RGA publication is available, cite the software as:
 
 ```text
-Citation information will be updated after publication.
+Li Z. RGA: Resequencing Genome Analysis Toolkit, version 3.24.
+https://rga.kefan.work/
 ```
 
-Before publication of the corresponding manuscript, RGA can be described in the Materials and Methods section as:
-
-```text
-Whole-genome resequencing data were analyzed using the
-Resequencing Genome Analysis Toolkit (RGA, version 3.24).
-```
-
-The final citation information, DOI, and publication details will be added to this repository after publication.
-
----
-
-## Software Availability
-
-RGA software releases are made available through this repository for **academic and non-commercial research use**.
-
-This repository is intended primarily for:
-
-- software distribution;
-- release management;
-- documentation;
-- version tracking;
-- issue reporting.
-
-**The RGA source code is not publicly distributed through this repository.**
-
----
+Please also cite the original publications for BWA/BWA-MEM2, Samtools, GATK, VarScan, Qualimap, snpEff, IGV, sv-callers, and the SV callers used in the selected workflow.
 
 ## License
 
-RGA is distributed under the **RGA Academic Software License**.
+RGA-authored binary software and documentation are distributed under the [PolyForm Noncommercial License 1.0.0](./LICENSE). It permits noncommercial research and use by educational institutions, public research organizations, government institutions, and other qualifying noncommercial organizations. Commercial use requires a separate written license from the RGA copyright holder.
 
-The software may be downloaded and used for academic and non-commercial research purposes subject to the terms specified in the [`LICENSE`](LICENSE) file.
+This is **not an OSI-approved open-source distribution**: the RGA source code is not supplied, and commercial use is restricted. Access to a public GitHub repository or release asset does not grant rights beyond those stated in `LICENSE`.
 
-Unless explicit written permission is obtained from the copyright holder, users may not:
+Third-party components and external programs remain subject to their own licenses. See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md). The bundled sv-callers v1.2.2 archive is an unmodified upstream release redistributed under Apache License 2.0. VarScan is subject to its own noncommercial-use terms; RGA does not grant commercial VarScan rights.
 
-- redistribute RGA;
-- sublicense RGA;
-- resell RGA;
-- commercially exploit RGA;
-- modify or create derivative distributions of RGA;
-- reverse engineer, decompile, or disassemble RGA.
+## Research-Use Disclaimer
 
-Use of third-party software interfaced with RGA remains subject to the licenses of the respective third-party software packages.
+RGA is provided for research use only. It is not a medical device and is not intended for clinical diagnosis, treatment selection, or other regulated clinical decisions. The software and its outputs are provided without warranty; users are responsible for validating analyses, maintaining data security, and complying with institutional, legal, ethical, and third-party license requirements.
 
-Please read the [`LICENSE`](LICENSE) and [`THIRD_PARTY_SOFTWARE.md`](THIRD_PARTY_SOFTWARE.md) files before using or redistributing any software components.
+## Support
 
----
+For reproducible bug reports, include the RGA version, operating system, command line with sensitive information removed, environment-check report, and the relevant final section of the log.
 
-## Issues and Feedback
+- Website: [https://rga.kefan.work/](https://rga.kefan.work/)
+- Email: [lizhe@impcas.ac.cn](mailto:lizhe@impcas.ac.cn)
+- Bug reports: use this repository's **Issues** page
 
-If you encounter a problem while using RGA, please submit an issue through the **Issues** section of this repository.
+## 中文快速说明
 
-When reporting an issue, please provide the following information whenever possible:
+RGA（Resequencing Genome Analysis Toolkit）是面向双端全基因组重测序数据的Linux命令行分析工具，可完成BWA/BWA-MEM2比对、Samtools BAM处理、Qualimap质控、GATK与VarScan SNP/INDEL检测、SV检测、目标样本特异性候选变异筛选、snpEff注释和IGV批量截图。
 
-- RGA version;
-- Linux distribution;
-- relevant analysis module;
-- input data type;
-- command or analysis step involved;
-- complete error message;
-- relevant log information.
+本GitHub仓库仅用于发布编译后的RGA分发包、文档和版本信息，不提供RGA源代码。因此，本项目应表述为“仅提供二进制分发的非商业科研软件”，不应表述为开源软件。
 
-Please do not upload large sequencing datasets, confidential data, or sensitive information directly to GitHub Issues.
+最小运行命令：
 
----
+```bash
+./rga -R /绝对路径/reference.fa -sdn 对应的snpEff数据库名称
+```
 
-## Repository Scope
+中文帮助：
 
-This repository is the official distribution repository for the **Resequencing Genome Analysis Toolkit (RGA)**.
+```bash
+./rga -lang zn
+./rga -lang zn -help
+```
 
-It is maintained for:
+输入数据必须存放在：
 
-> **Software download · Version management · Documentation · Issue tracking**
+```text
+data/group_data/<样品组>/<样品名>_1.clean.fq.gz
+data/group_data/<样品组>/<样品名>_2.clean.fq.gz
+```
 
-and is **not a public source-code repository**.
+RGA本体采用PolyForm Noncommercial License 1.0.0，仅授权非商业科研用途。商业用途需提前联系软件作者并取得书面许可。随包提供的sv-callers v1.2.2为原样打包的官方Release，适用其Apache License 2.0；VarScan及其他外部工具继续适用各自的原始协议，RGA协议不替代第三方软件协议。
 
----
-
-## Contact
-
-For questions related to RGA, please use the **Issues** section of this repository.
-
-For academic collaboration or other inquiries, contact information can be provided here after the corresponding publication is available.
-
----
-
-## Disclaimer
-
-RGA is provided for research purposes.
-
-The developers make no warranty regarding the accuracy, completeness, reliability, or suitability of the software for any particular purpose.
-
-Users are responsible for validating analysis results and determining whether the software and its parameters are appropriate for their specific datasets and research applications.
+详细部署、参数和结果说明请阅读[RGA研究人员部署与使用指南](./RGA_研究人员部署与使用指南.md)。
