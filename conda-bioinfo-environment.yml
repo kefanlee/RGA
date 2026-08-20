@@ -1,0 +1,37 @@
+name: bioinfo
+channels:
+  - bioconda
+  - conda-forge
+  - r
+  - defaults
+dependencies:
+  - bwa
+  - fastq
+  - snpeff
+  - fastp
+  - multiqc
+  - fastqc
+  - svim-asm
+  - picard
+  - spades
+  - quast
+  - abyss
+  - canu
+  - flye
+  - wtdbg
+  - smartdenovo
+  - miniasm
+  - racon
+  - pilon
+  - samtools=1.21
+  - vcftools
+  - kmc
+  - genomescope2
+  - pb-assembly
+  - nextpolish
+  - bwa-mem2
+  - sambamba
+  - samblaster
+  - graphtyper
+  - genmap
+prefix: /share/apps/softwares/miniconda3/envs/bioinfo
