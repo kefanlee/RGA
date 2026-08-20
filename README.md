@@ -1,5 +1,3 @@
-# RGA
-
 ## Resequencing Genome Analysis Toolkit
 
 **RGA** is an integrated command-line toolkit for automated and standardized analysis of whole-genome resequencing data. It was developed to simplify large-scale variant analysis, particularly for experimentally induced mutant populations, by integrating major steps from sequence alignment and variant detection to multi-sample comparison, functional annotation, quality assessment, and downstream result organization.
