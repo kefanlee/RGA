@@ -15,20 +15,20 @@ Contact: [Zhe Li](mailto:lizhe@impcas.ac.cn) |  [Yan Du](mailto:duyan@impcas.ac.
 
 ---
 
+
 ## Overview
 
 **RGA** is an integrated command-line toolkit for automated and reproducible analysis of paired-end whole-genome resequencing data. It was developed to simplify multi-step resequencing workflows by integrating commonly used bioinformatics tools into a unified analysis framework with standardized execution and output organization.
 
-The RGA workflow covers the major stages of whole-genome variant analysis, including read alignment, BAM processing and quality assessment, SNP and INDEL calling, structural-variant detection, variant filtering, functional annotation, result merging, and optional IGV-based visualization. RGA supports BWA or BWA-MEM2 for read alignment, GATK and/or VarScan for SNP and INDEL detection, Qualimap for alignment quality assessment, snpEff for functional annotation, and an optional structural-variant workflow incorporating multiple SV callers.
+The RGA workflow covers the major stages of whole-genome variant analysis, including read alignment, BAM processing and quality assessment, SNP and INDEL calling, structural-variant detection, variant filtering, functional annotation, result merging, and optional IGV-based visualization. RGA supports **BWA or BWA-MEM2** for read alignment, **GATK and/or VarScan** for SNP and INDEL detection, **Qualimap** for alignment quality assessment, **snpEff** for functional annotation, and **sv-callers** for optional structural-variant analysis using multiple SV callers.
 
-A central function of RGA is **multi-sample candidate variant screening**. For each target sample, candidate variants can be filtered according to alternative-allele frequency and read support in the target sample while simultaneously evaluating the same genomic positions across non-target samples. This strategy facilitates the removal of shared background variation and prioritization of sample-specific candidate variants, making RGA particularly suitable for large mutant populations and other resequencing studies involving multiple related samples.
+A central function of RGA is **multi-sample candidate variant screening**. For each target sample, candidate variants can be filtered according to alternative-allele frequency and read support in the target sample while simultaneously evaluating the corresponding genomic positions across non-target samples. This strategy helps reduce shared background variation and prioritize target-sample-specific candidate variants, making RGA particularly suitable for large mutant populations and other resequencing studies involving multiple related samples.
 
-RGA also supports multi-threaded analysis, resume-aware execution, optional removal of large intermediate alignment files, automated IGV batch snapshots, and analysis-completion notifications. These functions are intended to reduce repetitive manual operations and improve the consistency and reproducibility of large-scale resequencing analyses.
+RGA also supports multi-threaded analysis, resume-aware execution, optional removal of large intermediate alignment files, automated IGV batch snapshots, and analysis-completion notifications. These functions reduce repetitive manual operations and improve the consistency and reproducibility of large-scale resequencing analyses.
 
-RGA was developed primarily for genomic analysis of experimentally induced mutant populations and has particular utility in studies involving radiation mutagenesis, heavy-ion irradiation, space mutagenesis, chemical mutagenesis, and other mutant resources. The toolkit can also be applied to general multi-sample whole-genome resequencing projects when the required reference genome and annotation resources are available.
+RGA was developed primarily for genomic analysis of experimentally induced mutant populations and is applicable to studies involving radiation mutagenesis, heavy-ion irradiation, space mutagenesis, chemical mutagenesis, and other mutant resources. It can also be applied to general multi-sample whole-genome resequencing projects when appropriate reference genome and annotation resources are available.
 
 RGA is currently distributed as **compiled Linux research software**. This repository provides official release packages, documentation, and version information; the RGA source code is not publicly distributed.
-
 
 ---
 
@@ -50,7 +50,7 @@ Whole-genome resequencing data were analyzed using the
 Resequencing Genome Analysis Toolkit (RGA, version 3.24).
 ```
 
-Please also cite the original publications of the external bioinformatics tools actually used in the analysis, such as BWA/BWA-MEM2, Samtools, GATK, VarScan, Qualimap, snpEff, IGV, and the selected structural-variant callers.
+Please also cite the original publications of the external bioinformatics tools actually used in the analysis, including BWA/BWA-MEM2, Samtools, GATK, VarScan, Qualimap, snpEff, IGV, **sv-callers**, and the structural-variant callers used by the selected sv-callers workflow.
 
 Formal citation information will be updated after publication of the corresponding RGA manuscript.
 
@@ -73,7 +73,7 @@ conda env create -n rga -f conda-bioinfo-environment.yml
 conda activate rga
 ```
 
-If structural-variant analysis is required:
+If structural-variant analysis through **sv-callers** is required, create the corresponding workflow environment:
 
 ```bash
 conda env create -n wf -f conda-wf-environment.yml
@@ -85,11 +85,13 @@ Before the first analysis, check the software environment:
 ./rga -envcheck
 ```
 
-For SV analysis:
+For structural-variant analysis with sv-callers:
 
 ```bash
 ./rga -enable-sv -envcheck
 ```
+
+The RGA release package includes an unmodified copy of the official **sv-callers v1.2.2** release archive. When SV analysis is enabled, RGA prepares the bundled sv-callers workflow automatically unless a custom sv-callers path is specified.
 
 ---
 
@@ -144,40 +146,41 @@ Example using BWA-MEM2 and both GATK and VarScan:
   -c both
 ```
 
+To additionally enable structural-variant detection with sv-callers:
+
+```bash
+./rga \
+  -R /absolute/path/to/reference.fa \
+  -sdn snpEff_database_name \
+  -t 16 \
+  -mt bwa-mem2 \
+  -c both \
+  -enable-sv
+```
+
 ---
 
 ## Core Options
 
-| Option                      | Description                                 | Default  |
-| --------------------------- | ------------------------------------------- | -------- |
-| `-R`, `-ref FILE`           | Reference-genome FASTA                      | required |
-| `-sdn`, `-snpeffdbname STR` | snpEff database name                        | required |
-| `-t`, `-threads INT`        | Number of threads                           | `16`     |
-| `-mt`, `-mappingtool STR`   | `bwa` or `bwa-mem2`                         | `bwa`    |
-| `-c`, `-caller STR`         | `gatk`, `varscan`, or `both`                | `gatk`   |
-| `-maxf`, `-max-freq FLOAT`  | Minimum ALT frequency in target sample      | `0.25`   |
-| `-minf`, `-min-freq FLOAT`  | Maximum ALT frequency in non-target samples | `0.10`   |
-| `-tr`, `-total-reads INT`   | Minimum total read support                  | `0`      |
-| `-ar`, `-alt-reads INT`     | Minimum ALT read support                    | `1`      |
-| `-enable-sv`                | Enable structural-variant analysis          | disabled |
-| `-enable-snp-indel-igv`     | Generate SNP/INDEL IGV snapshots            | disabled |
-| `-enable-sv-igv`            | Generate SV IGV snapshots                   | disabled |
-| `-autoclear`                | Remove alignment intermediates              | disabled |
-| `-send-email`               | Send completion notification                | disabled |
-| `-lang STR`                 | Interface language: `en`, `zn`, `zh`        | `en`     |
-| `-envcheck`                 | Check runtime environment and exit          | disabled |
+| Option                      | Description                                           | Default  |
+| --------------------------- | ----------------------------------------------------- | -------- |
+| `-R`, `-ref FILE`           | Reference-genome FASTA                                | required |
+| `-sdn`, `-snpeffdbname STR` | snpEff database name                                  | required |
+| `-t`, `-threads INT`        | Number of threads                                     | `16`     |
+| `-mt`, `-mappingtool STR`   | `bwa` or `bwa-mem2`                                   | `bwa`    |
+| `-c`, `-caller STR`         | `gatk`, `varscan`, or `both`                          | `gatk`   |
+| `-maxf`, `-max-freq FLOAT`  | Minimum ALT frequency in target sample                | `0.25`   |
+| `-minf`, `-min-freq FLOAT`  | Maximum ALT frequency in non-target samples           | `0.10`   |
+| `-tr`, `-total-reads INT`   | Minimum total read support                            | `0`      |
+| `-ar`, `-alt-reads INT`     | Minimum ALT read support                              | `1`      |
+| `-enable-sv`                | Enable structural-variant analysis through sv-callers | disabled |
+| `-enable-snp-indel-igv`     | Generate SNP/INDEL IGV snapshots                      | disabled |
+| `-enable-sv-igv`            | Generate SV IGV snapshots                             | disabled |
+| `-autoclear`                | Remove alignment intermediates                        | disabled |
+| `-send-email`               | Send completion notification                          | disabled |
+| `-lang STR`                 | Interface language: `en`, `zn`, `zh`                  | `en`     |
+| `-envcheck`                 | Check runtime environment and exit                    | disabled |
 
-For the complete parameter list:
-
-```bash
-./rga -help
-```
-
-Chinese interface:
-
-```bash
-./rga -lang zn -help
-```
 
 ---
 
@@ -197,6 +200,8 @@ data/group_data/<group>/gatk_snp_indel/
 data/group_data/<group>/varscan_snp_indel/
 data/group_data/<group>/sv_detection/
 ```
+
+The `sv_detection/` directory contains structural-variant results generated through the **sv-callers** workflow when `-enable-sv` is enabled.
 
 Final annotated candidate VCF files are generated in the project working directory:
 
@@ -224,6 +229,8 @@ RGA is distributed as **binary-only research software** and is not an open-sourc
 
 Third-party software and bundled components remain subject to their respective licenses.
 
+The RGA release package includes an unmodified copy of the official **sv-callers v1.2.2** release archive. sv-callers remains subject to its original **Apache License 2.0**, and the individual software packages used within the workflow remain subject to their respective licenses.
+
 See:
 
 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)
@@ -235,7 +242,7 @@ See:
 For questions, bug reports, or reproducibility issues:
 
 * **Website:** https://rga.kefan.work/
-* **Email:** [lizhe@impcas.ac.cn](mailto:lizhe@impcas.ac.cn)
+* **Email:** [lizhe@impcas.ac.cn](mailto:lizhe@impcas.ac.cn) | [duyan@impcas.ac.cn](mailto:duyan@impcas.ac.cn)
 * **Issues:** use this repository's **Issues** page
 
 When reporting an issue, please include the RGA version, operating system, command used, relevant log output, and error message.
