@@ -40,8 +40,9 @@ If RGA is used in your research, please report the RGA version and major analysi
 Until the corresponding RGA publication is available, the software can be cited as:
 
 ```text
-Li Z. RGA: Resequencing Genome Analysis Toolkit. Version 3.24.
-https://rga.kefan.work/
+Formal citation information will be updated after publication of the corresponding RGA manuscript.
+
+
 ```
 
 In the Methods section, RGA may be described as:
