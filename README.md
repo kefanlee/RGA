@@ -8,14 +8,14 @@
 RGA is a command-line toolkit for reproducible analysis of paired-end whole-genome resequencing data. It integrates read alignment, BAM processing and quality assessment, SNP/INDEL calling, structural-variant detection, target-sample-specific candidate filtering, functional annotation, result merging, and optional IGV batch snapshots in a single workflow.
 
 Website: [https://rga.kefan.work/](https://rga.kefan.work/)  
-Contact: [Zhe Li](mailto:lizhe@impcas.ac.cn)
+Contact: [Zhe Li](mailto:lizhe@impcas.ac.cn) |  [Yan Du](mailto:duyan@impcas.ac.cn) 
 
 > [!IMPORTANT]
 > This repository distributes compiled RGA release packages, documentation, and release information. RGA source code is not published in this repository. RGA is therefore described as **binary-distributed research software**, not as open-source software.
 
 ---
 
-## RGA Overview
+## Overview
 
 **RGA** is an integrated command-line toolkit for automated and reproducible analysis of paired-end whole-genome resequencing data. It was developed to simplify multi-step resequencing workflows by integrating commonly used bioinformatics tools into a unified analysis framework with standardized execution and output organization.
 
