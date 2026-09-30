@@ -41,8 +41,6 @@ Until the corresponding RGA publication is available, the software can be cited 
 
 ```text
 Formal citation information will be updated after publication of the corresponding RGA manuscript.
-
-
 ```
 
 In the Methods section, RGA may be described as:
